@@ -4,9 +4,14 @@
     <meta charset="utf-8">
     <title>中国省级地图</title>
     <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
         #map {
-            width: 800px;
-            height: 600px;
+            width: 100vw;
+            height: 100vh;
             position: relative;
         }
         .province {
@@ -36,16 +41,16 @@
     <script>
         // 加载中国地图数据
         d3.json("China.json").then(function (china) {
-            console.log(china); // 检查地图数据
+            var width = window.innerWidth;
+            var height = window.innerHeight;
 
-            var width = 800;
-            var height = 600;
-
-            // 初始化地图投影
+            // 计算比例尺和投影配置
+            var scale = Math.min(width, height) * 0.8;
+            var center = [width / 2, height / 2];
             var projection = d3.geoMercator()
-                .center([105, 38])
-                .scale(600)
-                .translate([width / 2, height / 2]);
+                .center(center)
+                .scale(scale)
+                .translate(center);
 
             // 创建SVG容器
             var svg = d3.select("#map")
@@ -66,8 +71,6 @@
                     d3.select(this).attr("fill", "#ccc");
                 })
                 .on("click", function (d) {
-                    console.log(d); // 检查点击事件的数据对象
-
                     var provinceName = d.properties.name;
                     var popup = d3.select("#map").append("div")
                         .attr("class", "popup")
