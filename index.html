@@ -37,9 +37,10 @@
         L.geoJSON.ajax('China.json', {
             style: style,
             filter: function(feature, layer) {
-                return feature.properties.name === '中国';
+                return feature.properties.adcode === '100000'; // 中国的adcode为100000
             }
         }).addTo(map);
     </script>
 </body>
 </html>
+
