@@ -36,6 +36,8 @@
     <script>
         // 加载中国地图数据
         d3.json("China.json").then(function (china) {
+            console.log(china); // 检查地图数据
+
             var width = 800;
             var height = 600;
 
@@ -64,6 +66,8 @@
                     d3.select(this).attr("fill", "#ccc");
                 })
                 .on("click", function (d) {
+                    console.log(d); // 检查点击事件的数据对象
+
                     var provinceName = d.properties.name;
                     var popup = d3.select("#map").append("div")
                         .attr("class", "popup")
