@@ -24,7 +24,19 @@
             attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
         }).addTo(map);
         
-        L.geoJSON.ajax('China.json').addTo(map);
+        function style(feature) {
+            return {
+                fillColor: '#ccc',
+                weight: 1,
+                opacity: 1,
+                color: 'white',
+                fillOpacity: 0.7
+            };
+        }
+        
+        L.geoJSON.ajax('China.json', {
+            style: style
+        }).addTo(map);
     </script>
 </body>
 </html>
