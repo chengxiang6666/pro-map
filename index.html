@@ -3,94 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <title>中国省级地图</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         #map {
-            position: relative;
             width: 800px;
             height: 600px;
-            background-color: #f2f2f2;
-        }
-        .province {
-            fill: #ccc;
-            stroke: #fff;
-            stroke-width: 1px;
-            cursor: pointer;
-        }
-        .province:hover {
-            fill: #999;
-        }
-        .province-info {
-            position: absolute;
-            display: none;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div id="map"></div>
     
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
     <script>
-        // 加载China.json文件
-        d3.json('China.json').then(function(data) {
-            var provinces = data.features;
-            
-            // 创建SVG元素
-            var svg = d3.select('#map')
-                .append('svg')
-                .attr('width', 800)
-                .attr('height', 600);
-            
-            // 创建地图投影
-            var projection = d3.geoMercator()
-                .fitSize([800, 600], data);
-            
-            // 创建路径生成器
-            var path = d3.geoPath(projection);
-            
-            // 绘制省份边界
-            svg.selectAll('.province')
-                .data(provinces)
-                .enter()
-                .append('path')
-                .attr('class', 'province')
-                .attr('d', path)
-                .on('click', showInfoBox);
-            
-            // 创建省级行政单位信息框
-            function createInfoBox(provinceName) {
-                var infoBox = document.createElement('div');
-                infoBox.className = 'province-info';
-                infoBox.innerHTML = '<h3>' + provinceName + '</h3>';
-                return infoBox;
-            }
-            
-            // 在地图上显示省级行政单位信息框
-            function showInfoBox(event, d) {
-                var provinceName = d.properties.name;
-                
-                var infoBox = createInfoBox(provinceName);
-                infoBox.style.left = (event.clientX + 10) + 'px';
-                infoBox.style.top = (event.clientY + 10) + 'px';
-                
-                document.body.appendChild(infoBox);
-            }
-            
-            // 隐藏省级行政单位信息框
-            function hideInfoBox() {
-                var infoBox = document.querySelector('.province-info');
-                if (infoBox) {
-                    infoBox.remove();
-                }
-            }
-            
-            // 添加鼠标离开地图时隐藏信息框的事件
-            svg.on('mouseleave', hideInfoBox);
-        }).catch(function(error) {
-            console.log(error);
-        });
+        var map = L.map('map').setView([35.8617, 104.1954], 4);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        L.geoJSON.ajax('China.json').addTo(map);
     </script>
 </body>
 </html>
