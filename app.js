@@ -9,10 +9,12 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // 使用ArcGIS的地图服务URL
 var serviceUrl = 'https://services.arcgisonline.com/arcgis/rest/services/ChinaBoundary/MapServer';
 
-// 加载地图数据
+// 加载地图数据并添加过滤器
 L.esri.dynamicMapLayer({
     url: serviceUrl,
-    opacity: 0.7
+    opacity: 0.7,
+    layers: [0], // 仅加载第一个图层，即中国省级边界图层
+    where: "ID IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34)" // 仅显示ID为1到34的要素
 }).addTo(map);
 
 // 创建Popup对象
