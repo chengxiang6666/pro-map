@@ -1,43 +1,85 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Interactive Map</title>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
+<head>
+    <meta charset="utf-8">
+    <title>中国省级地图</title>
     <style>
-      .province {
-        stroke: #fff;
-        stroke-width: 1;
-      }
-      .province:hover {
-        fill: orange;
-      }
+        #map {
+            width: 800px;
+            height: 600px;
+            position: relative;
+        }
+        .province {
+            fill: #ccc;
+            stroke: #fff;
+            stroke-width: 1px;
+            cursor: pointer;
+        }
+        .province:hover {
+            fill: #999;
+        }
+        .popup {
+            position: absolute;
+            display: none;
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v2.min.js"></script>
     <script>
-      var width = 960,
-          height = 500;
+        // 加载中国地图数据
+        d3.json("China.json").then(function (china) {
+            var width = 800;
+            var height = 600;
 
-      var svg = d3.select("body")
-                  .append("svg")
-                  .attr("width", width)
-                  .attr("height", height);
+            // 初始化地图投影
+            var projection = d3.geoMercator()
+                .center([105, 38])
+                .scale(600)
+                .translate([width / 2, height / 2]);
 
-      var projection = d3.geoMercator().translate([width / 2, height / 2]);
-      var path = d3.geoPath().projection(projection);
+            // 创建SVG容器
+            var svg = d3.select("#map")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
 
-      d3.json("China.json", function(error, data) {
-        if (error) throw error;
+            // 绘制省份路径
+            svg.selectAll(".province")
+                .data(china.features)
+                .enter().append("path")
+                .attr("class", "province")
+                .attr("d", d3.geoPath().projection(projection))
+                .on("mouseover", function (d) {
+                    d3.select(this).attr("fill", "#999");
+                })
+                .on("mouseout", function (d) {
+                    d3.select(this).attr("fill", "#ccc");
+                })
+                .on("click", function (d) {
+                    var provinceName = d.properties.name;
+                    var popup = d3.select("#map").append("div")
+                        .attr("class", "popup")
+                        .style("left", (d3.event.pageX + 10) + "px")
+                        .style("top", (d3.event.pageY + 10) + "px")
+                        .html("<strong>" + provinceName + "</strong>的信息");
 
-        svg.selectAll(".province")
-           .data(data.features)
-           .enter()
-           .append("path")
-           .attr("class", "province")
-           .attr("d", path)
-           .on("click", function(d) {
-             alert(d.properties.name);
-           });
-      });
+                    // 点击地图其他地方时，隐藏弹出框
+                    d3.select("body").on("click", function () {
+                        popup.remove();
+                    });
+
+                    // 阻止事件冒泡
+                    d3.event.stopPropagation();
+                });
+        });
     </script>
-  </body>
+</body>
 </html>
