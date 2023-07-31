@@ -35,12 +35,11 @@
         
         // 只加载中国的边界数据
         L.geoJSON.ajax('China.json', {
+            style: style,
             filter: function(feature, layer) {
                 return feature.properties.name === '中国';
-            },
-            style: style
+            }
         }).addTo(map);
     </script>
 </body>
 </html>
-
