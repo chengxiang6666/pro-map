@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>中国省级地图</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
         #map {
-            width: 100%;
-            height: 100%;
             position: relative;
+            width: 800px;
+            height: 600px;
+            background-color: #f2f2f2;
         }
         .province {
             fill: #ccc;
@@ -23,69 +20,76 @@
         .province:hover {
             fill: #999;
         }
-        .popup {
+        .province-info {
             position: absolute;
             display: none;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.8);
             padding: 10px;
-            border: 1px solid #ccc;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div id="map"></div>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://d3js.org/topojson.v2.min.js"></script>
+    
     <script>
-        // 加载中国地图数据
-        d3.json("China.json").then(function (china) {
-            var width = window.innerWidth;
-            var height = window.innerHeight;
-
-            // 计算比例尺和投影配置
-            var scale = Math.min(width, height) * 0.8;
-            var center = [width / 2, height / 2];
+        // 加载China.json文件
+        d3.json('China.json').then(function(data) {
+            var provinces = data.features;
+            
+            // 创建SVG元素
+            var svg = d3.select('#map')
+                .append('svg')
+                .attr('width', 800)
+                .attr('height', 600);
+            
+            // 创建地图投影
             var projection = d3.geoMercator()
-                .fitSize([width, height], china)
-                .center(center)
-                .translate(center);
-
-            // 创建SVG容器
-            var svg = d3.select("#map")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
-
-            // 绘制省份路径
-            svg.selectAll(".province")
-                .data(china.features)
-                .enter().append("path")
-                .attr("class", "province")
-                .attr("d", d3.geoPath().projection(projection))
-                .on("mouseover", function (d) {
-                    d3.select(this).attr("fill", "#999");
-                })
-                .on("mouseout", function (d) {
-                    d3.select(this).attr("fill", "#ccc");
-                })
-                .on("click", function (d) {
-                    var provinceName = d.properties.name;
-                    var popup = d3.select("#map").append("div")
-                        .attr("class", "popup")
-                        .style("left", (d3.event.pageX + 10) + "px")
-                        .style("top", (d3.event.pageY + 10) + "px")
-                        .html("<strong>" + provinceName + "</strong>的信息");
-
-                    // 点击地图其他地方时，隐藏弹出框
-                    d3.select("body").on("click", function () {
-                        popup.remove();
-                    });
-
-                    // 阻止事件冒泡
-                    d3.event.stopPropagation();
-                });
+                .fitSize([800, 600], data);
+            
+            // 创建路径生成器
+            var path = d3.geoPath(projection);
+            
+            // 绘制省份边界
+            svg.selectAll('.province')
+                .data(provinces)
+                .enter()
+                .append('path')
+                .attr('class', 'province')
+                .attr('d', path)
+                .on('click', showInfoBox);
+            
+            // 创建省级行政单位信息框
+            function createInfoBox(provinceName) {
+                var infoBox = document.createElement('div');
+                infoBox.className = 'province-info';
+                infoBox.innerHTML = '<h3>' + provinceName + '</h3>';
+                return infoBox;
+            }
+            
+            // 在地图上显示省级行政单位信息框
+            function showInfoBox(event, d) {
+                var provinceName = d.properties.name;
+                
+                var infoBox = createInfoBox(provinceName);
+                infoBox.style.left = (event.clientX + 10) + 'px';
+                infoBox.style.top = (event.clientY + 10) + 'px';
+                
+                document.body.appendChild(infoBox);
+            }
+            
+            // 隐藏省级行政单位信息框
+            function hideInfoBox() {
+                var infoBox = document.querySelector('.province-info');
+                if (infoBox) {
+                    infoBox.remove();
+                }
+            }
+            
+            // 添加鼠标离开地图时隐藏信息框的事件
+            svg.on('mouseleave', hideInfoBox);
+        }).catch(function(error) {
+            console.log(error);
         });
     </script>
 </body>
