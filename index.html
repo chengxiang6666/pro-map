@@ -1,97 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Interactive Map of China</title>
+    <title>中国省级粗略地图</title>
     <style>
         #map {
+            position: relative;
             width: 800px;
             height: 600px;
-            position: relative;
+            background-color: #F5F5F5;
         }
         .province {
-            fill: #ccc;
-            stroke: #fff;
-            stroke-width: 1;
-            cursor: pointer;
-        }
-        .province:hover {
-            fill: #aaa;
-        }
-        .province-text {
-            font-size: 12px;
-            fill: #000;
-            pointer-events: none;
-        }
-        .info-box {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            color: white;
+            text-align: center;
+            line-height: 24px;
+            border: 1px solid #FFFFFF;
+            background-color: #428BCA;
+            opacity: 0.8;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 830px;
+            width: 200px;
+            height: 200px;
+            background-color: #F5F5F5;
+            border: 1px solid #CCCCCC;
             padding: 10px;
-            background-color: #fff;
-            border: 1px solid #ccc;
             display: none;
+        }
+        #close {
+            text-align: right;
         }
     </style>
 </head>
 <body>
-    <div id="map"></div>
-    <div class="info-box"></div>
+    <div id="map">
+        <!-- 使用China.json数据生成省份元素 -->
+        <script src="China.json"></script>
+        <script>
+            var map = document.getElementById("map");
 
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script>
-        // 加载中国地图数据
-        d3.json("China.json").then(function (data) {
-            drawMap(data);
-        });
+            for (var i = 0; i < China.length; i++) {
+                var province = document.createElement("div");
+                province.className = "province";
+                province.style.top = China[i].top + "px";
+                province.style.left = China[i].left + "px";
+                province.style.width = China[i].width + "px";
+                province.style.height = China[i].height + "px";
+                province.textContent = China[i].name;
 
-        function drawMap(data) {
-            var width = 800;
-            var height = 600;
-
-            var svg = d3.select("#map")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
-
-            var projection = d3.geoMercator()
-                .fitSize([width, height], data);
-
-            var path = d3.geoPath()
-                .projection(projection);
-
-            svg.selectAll(".province")
-                .data(data.features)
-                .enter().append("path")
-                .attr("class", "province")
-                .attr("d", path)
-                .on("click", function (d) {
-                    showInfoBox(d.properties.name);
+                province.addEventListener("click", function() {
+                    showInfo(this.textContent);
                 });
 
-            svg.selectAll(".province-text")
-                .data(data.features)
-                .enter().append("text")
-                .attr("class", "province-text")
-                .attr("transform", function (d) {
-                    var centroid = path.centroid(d);
-                    return "translate(" + centroid + ")";
-                })
-                .attr("dy", ".35em")
-                .text(function (d) {
-                    return d.properties.name;
-                });
-
-            function showInfoBox(province) {
-                var infoBox = d3.select(".info-box");
-                if (infoBox.style("display") === "none") {
-                    infoBox.style("display", "block")
-                        .text("You clicked on " + province)
-                        .transition()
-                        .delay(2000)
-                        .style("display", "none");
-                }
+                map.appendChild(province);
             }
-        }
-    </script>
+
+            function showInfo(provinceName) {
+                var info = document.getElementById("info");
+                var close = document.createElement("div");
+                close.textContent = "关闭";
+                close.style.cursor = "pointer";
+                close.addEventListener("click", function() {
+                    info.style.display = "none";
+                });
+
+                info.innerHTML = "<div id='close'></div><h3>" + provinceName + "</h3><p>这里是" + provinceName + "的相关信息。</p>";
+                info.appendChild(close);
+                info.style.display = "block";
+            }
+        </script>
+    </div>
+    <div id="info"></div>
 </body>
 </html>
