@@ -1,25 +1,34 @@
-// 创建地图容器
-var map = L.map('map').setView([34.5, 105], 4);
+// 加载地图数据
+d3.json("China.json").then(function (data) {
+    var provinces = data.provinces;
 
-// 添加地图瓦片图层
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-}).addTo(map);
+    // 创建SVG元素
+    var svg = d3.select("#map")
+                .append("svg")
+                .attr("width", 800)
+                .attr("height", 600);
 
-// 使用GeoJSON数据加载中国34个省边界
-fetch('China.json')
-    .then(function(response) {
-        return response.json();
-    })
-    .then(function(data) {
-        // 过滤出中国34个省边界数据
-        var chinaProvinces = data.features.filter(function(feature) {
-            return feature.properties.level === 'province' && feature.properties.name !== '台湾省'; // 排除台湾省
+    // 绘制省份边界
+    svg.selectAll("path")
+        .data(provinces)
+        .enter()
+        .append("path")
+        .attr("d", function (d) { return d.path; })
+        .attr("fill", "lightgray")
+        .attr("stroke", "black")
+        .on("click", function (d) {
+            // 显示信息框
+            showInfoBox(d.name, d.info);
         });
+});
 
-        // 创建GeoJSON图层并添加到地图上
-        var provincesLayer = L.geoJSON(chinaProvinces).addTo(map);
+// 显示信息框
+function showInfoBox(name, info) {
+    var infoBox = d3.select("#infoBox");
 
-        // 调整地图视图以适应中国34个省的边界
-        map.fitBounds(provincesLayer.getBounds());
-    });
+    // 更新信息框内容
+    infoBox.html("<h3>" + name + "</h3><p>" + info + "</p>");
+
+    // 显示信息框
+    infoBox.style("display", "block");
+}
