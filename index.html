@@ -4,30 +4,49 @@
     <title>中国省级地图</title>
     <style>
         #map {
-            width: 800px;
-            height: 600px;
-            border: 1px solid black;
+            position: relative;
+        }
+        .province {
+            position: absolute;
+            cursor: pointer;
         }
         .info-box {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px;
-            height: 100px;
-            background-color: white;
-            border: 1px solid black;
-            padding: 10px;
             display: none;
+            position: absolute;
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
 <body>
-    <div id="map"></div>
-    <div id="infoBox" class="info-box"></div>
+    <div id="map">
+        <img src="china_map.jpg" alt="中国地图" width="800" height="600">
+        <div class="province" style="top:100px; left:200px;" onclick="showInfo('北京')">北京</div>
+        <div class="province" style="top:200px; left:300px;" onclick="showInfo('上海')">上海</div>
+        <!-- 其他省份的区域标签 -->
+        <!-- ... -->
+    </div>
 
-    <script src="https://d3js.org/d3.v6.min.js"></script>
-    <script src="map.js"></script>
+    <div class="info-box" id="infoBox"></div>
+
+    <script>
+        function showInfo(province) {
+            var infoBox = document.getElementById("infoBox");
+            // 根据省份获取相应的信息文件
+            var file = "province_info/" + province + ".txt";
+            
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    infoBox.innerText = data;
+                    infoBox.style.display = "block";
+                })
+                .catch(error => {
+                    console.log("Error: " + error);
+                });
+        }
+    </script>
 </body>
 </html>
 
