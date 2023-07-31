@@ -1,79 +1,43 @@
-<!DOCTYPE html>
 <html>
-<head>
-    <title>中国省级粗略地图</title>
+  <head>
+    <title>Interactive Map</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
     <style>
-        #map {
-            position: relative;
-            width: 800px;
-            height: 600px;
-            background-color: #F5F5F5;
-        }
-        .province {
-            position: absolute;
-            cursor: pointer;
-            font-size: 12px;
-            color: white;
-            text-align: center;
-            line-height: 24px;
-            border: 1px solid #FFFFFF;
-            background-color: #428BCA;
-            opacity: 0.8;
-        }
-        #info {
-            position: absolute;
-            top: 10px;
-            left: 830px;
-            width: 200px;
-            height: 200px;
-            background-color: #F5F5F5;
-            border: 1px solid #CCCCCC;
-            padding: 10px;
-            display: none;
-        }
-        #close {
-            text-align: right;
-        }
+      .province {
+        stroke: #fff;
+        stroke-width: 1;
+      }
+      .province:hover {
+        fill: orange;
+      }
     </style>
-</head>
-<body>
-    <div id="map">
-        <!-- 使用China.json数据生成省份元素 -->
-        <script src="China.json"></script>
-        <script>
-            var map = document.getElementById("map");
+  </head>
+  <body>
+    <script>
+      var width = 960,
+          height = 500;
 
-            for (var i = 0; i < China.length; i++) {
-                var province = document.createElement("div");
-                province.className = "province";
-                province.style.top = China[i].top + "px";
-                province.style.left = China[i].left + "px";
-                province.style.width = China[i].width + "px";
-                province.style.height = China[i].height + "px";
-                province.textContent = China[i].name;
+      var svg = d3.select("body")
+                  .append("svg")
+                  .attr("width", width)
+                  .attr("height", height);
 
-                province.addEventListener("click", function() {
-                    showInfo(this.textContent);
-                });
+      var projection = d3.geoMercator().translate([width / 2, height / 2]);
+      var path = d3.geoPath().projection(projection);
 
-                map.appendChild(province);
-            }
+      d3.json("China.json", function(error, data) {
+        if (error) throw error;
 
-            function showInfo(provinceName) {
-                var info = document.getElementById("info");
-                var close = document.createElement("div");
-                close.textContent = "关闭";
-                close.style.cursor = "pointer";
-                close.addEventListener("click", function() {
-                    info.style.display = "none";
-                });
-
-                info.innerHTML = "<div id='close'></div><h3>" + provinceName + "</h3><p>这里是" + provinceName + "的相关信息。</p>";
-                info.appendChild(close);
-                info.style.display = "block";
-            }
-        </script>
-    </div>
-    <div id="info"></div>
-</body>
+        svg.selectAll(".province")
+           .data(data.features)
+           .enter()
+           .append("path")
+           .attr("class", "province")
+           .attr("d", path)
+           .on("click", function(d) {
+             alert(d.properties.name);
+           });
+      });
+    </script>
+  </body>
 </html>
